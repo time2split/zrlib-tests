@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 3.0)
+
+project(zrlib-tests)
+
+include_directories(libs/ zrlib/)
+add_subdirectory(zrlib/)
+
+set(SRCS
+    src/main.c
+	src/base/ArrayOpTests.c
+	src/base/BitsTests.c
+	src/base/MemoryOpTests.c
+    )
+    
+set(HEADERS
+	src/main.h
+	src/base/ArrayOpTests.h
+	src/base/BitsTests.h
+	src/base/MemoryOpTests.h
+    )
+
+add_executable(zrlib-tests ${SRCS} ${HEADERS})
+set_property(TARGET zrlib-tests PROPERTY C_STANDARD 11)
+target_link_libraries(zrlib-tests zrlib)
