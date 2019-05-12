@@ -4,12 +4,14 @@ project(zrlib-tests)
 
 include_directories(libs/ zrlib/)
 add_subdirectory(zrlib/)
+set(CMAKE_BUILD_TYPE Debug)
 
 set(SRCS
     src/main.c
 	src/base/ArrayOpTests.c
 	src/base/BitsTests.c
 	src/base/MemoryOpTests.c
+	src/base/Vector/VectorTests.c
     )
     
 set(HEADERS
@@ -17,6 +19,7 @@ set(HEADERS
 	src/base/ArrayOpTests.h
 	src/base/BitsTests.h
 	src/base/MemoryOpTests.h
+	src/base/Vector/VectorTests.h
     )
 
 add_executable(zrlib-tests ${SRCS} ${HEADERS})

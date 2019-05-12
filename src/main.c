@@ -2,12 +2,14 @@
  * @author zuri
  * @date dimanche 25 novembre 2018, 23:59:47 (UTC+0100)
  */
+#include <stdlib.h>
 #include <stdio.h>
 #include <minunit/minunit.h>
 
 #include "base/ArrayOpTests.h"
 #include "base/BitsTests.h"
 #include "base/MemoryOpTests.h"
+#include "base/Vector/VectorTests.h"
 
 char MESSAGE_BUFF[2048];
 char FUN_PREFIX[1024];
@@ -15,10 +17,10 @@ char FUN_PREFIX[1024];
 int main(int argc, char **argv)
 {
 	int (*testSuites[])(void) =
-	{	BitsTests, MemoryOpTests, MemoryArrayOpTests
-		};
+	{	BitsTests, MemoryOpTests, MemoryArrayOpTests, VectorTests
+	};
 	int i = 0;
-	const int nbof = sizeof (testSuites) / sizeof (*testSuites);
+	const int nbof = sizeof(testSuites) / sizeof(*testSuites);
 
 	for (; i < nbof; i++)
 	{
