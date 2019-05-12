@@ -49,7 +49,7 @@ static void FUN_PRINT_NAME(char * out, ZRBits *bits)
 
 	while (*bits != GUARD_BITS)
 	{
-		sprintf(buff, ZRBITS_PRI ":", *bits);
+		sprintf(buff, "%lX:", *bits);
 		strcat(out, buff);
 		bits++;
 	}
@@ -66,7 +66,7 @@ MU_TEST(testSetBits)
 	//Zero local
 	{
 		ZRBits expected[] =
-			{ 0x5 << ZRBITS_NBOF - 4, GUARD_BITS };
+			{ (ZRBits)0x5 << ZRBITS_NBOF - 4, GUARD_BITS };
 		ZRBits local[] =
 			{ 0, GUARD_BITS };
 
@@ -84,7 +84,7 @@ MU_TEST(testSetBits)
 	//Full one local
 	{
 		ZRBits expected[] =
-			{ ZRBITS_MASK_FULL & ~ (0x5 << ZRBITS_NBOF - 4), GUARD_BITS };
+			{ ZRBITS_MASK_FULL & ~ ((ZRBits)0x5 << ZRBITS_NBOF - 4), GUARD_BITS };
 		ZRBits local[] =
 			{ ZRBITS_MASK_FULL, GUARD_BITS };
 
@@ -102,7 +102,7 @@ MU_TEST(testSetBits)
 	//Overlap
 	{
 		ZRBits expected[] =
-			{ 5, 7 << ZRBITS_NBOF - 3, GUARD_BITS };
+			{ 5, (ZRBits)7 << ZRBITS_NBOF - 3, GUARD_BITS };
 		ZRBits local[] =
 			{ 0, 0, GUARD_BITS };
 
@@ -161,28 +161,28 @@ MU_TEST(testPack)
 	ZRBits local[2] =
 		{ 0, GUARD_BITS };
 	{
-		unsigned packet[] =
+		unsigned char packet[] =
 			{ 1, 0, 1, 1 };
-		ZRBits_pack(local, 1, packet, sizeof (packet) / sizeof (*packet));
+		ZRBits_cpack(local, 1, packet, sizeof (packet) / sizeof (*packet));
 		ZRTEST_BEGIN_MSG("1x4");
 		ZRTEST_END(MESSAGE_BUFF, local, expected);
 	}
 	{
-		unsigned packet[] =
+		unsigned char packet[] =
 			{ 2, 3 };
-		ZRBits_pack(local, 2, packet, sizeof (packet) / sizeof (*packet));
+		ZRBits_cpack(local, 2, packet, sizeof (packet) / sizeof (*packet));
 		ZRTEST_BEGIN_MSG("2x2");
 		ZRTEST_END(MESSAGE_BUFF, local, expected);
 	}
 	{
-		unsigned packet[] =
+		unsigned char packet[] =
 			{ 11 };
-		ZRBits_pack(local, 4, packet, sizeof (packet) / sizeof (*packet));
+		ZRBits_cpack(local, 4, packet, sizeof (packet) / sizeof (*packet));
 		ZRTEST_BEGIN_MSG("4x1");
 		ZRTEST_END(MESSAGE_BUFF, local, expected);
 	}
 	{
-		ZRBits const part = 5 << ZRBITS_NBOF - 3;
+		ZRBits const part = (ZRBits)5 << ZRBITS_NBOF - 3;
 		ZRBits expected[2] =
 			{ part | part >> 3 | part >> 6, GUARD_BITS };
 		unsigned packet[] =
@@ -259,7 +259,7 @@ MU_TEST(testCopyOneOverTwo)
 		ZRTEST_END(MESSAGE_BUFF, result, expected);
 	}
 	{
-		expected[0] = 0x17 << (ZRBITS_NBOF - 5) | ZRBITS_MASK_1R;
+		expected[0] = (ZRBits)0x17 << (ZRBITS_NBOF - 5) | ZRBITS_MASK_1R;
 		ZRTEST_BEGIN_MSG("pos=*1-3, nbBits=*1, outPos=0");
 		ZRBits_copy(local, ZRBITS_NBOF - 3, ZRBITS_NBOF, result, 0);
 		ZRTEST_END(MESSAGE_BUFF, result, expected);
