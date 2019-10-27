@@ -6,9 +6,6 @@
 #include "../../main.h"
 
 ZRAllocator *ALLOCATOR;
-ZRVectorStrategy *STRATEGY;
-ZRVector *RESULT;
-ZRVector *EXPECTED;
 
 #define LOCAL_ZRTEST_RESULT(prefix) \
 	ZRTEST_RESULT(prefix, MESSAGE_BUFF, result, expected)
@@ -21,54 +18,23 @@ ZRVector *EXPECTED;
 static void testSetup()
 {
 	mainTestSetup();
-	ALLOCATOR = malloc(sizeof(*ALLOCATOR));
-	ZRCAllocator_init(ALLOCATOR);
-	STRATEGY = ZRALLOC(ALLOCATOR, ZRVector_2SideStrategy_size());
-	ZRVector_2SideStrategy_init(STRATEGY, ALLOCATOR);
 }
 
-static void testShutdown(void)
+ZRVector* createFixedVector(size_t initialArraySize, size_t initialMemorySize)
 {
-	ZRVector_clean(RESULT);
-	free(RESULT);
-	ZRVector_clean(EXPECTED);
-	free(EXPECTED);
+	return ZRVector2SideStrategy_createFixedM(initialArraySize, initialMemorySize, sizeof(long), ALLOCATOR);
 }
 
-ZRVector* getExpectedVector(void)
+ZRVector* createDynamicVector(size_t initialArraySize, size_t initialMemorySize)
 {
-	if (EXPECTED == NULL)
-	{
-		EXPECTED = malloc(ZRVECTOR_SIZEOF_STRUCT(STRATEGY));
-		ZRVector_init(EXPECTED, sizeof(long), STRATEGY, NULL);
-		return EXPECTED;
-	}
-	else
-	{
-		ZRVECTOR_CLEAN(EXPECTED);
-		free(EXPECTED);
-		return getExpectedVector();
-	}
+	return ZRVector2SideStrategy_createDynamicM(initialArraySize, initialMemorySize, sizeof(long), ALLOCATOR);
 }
-ZRVector* getResultVector(void)
-{
-	if (RESULT == NULL)
-	{
-		RESULT = malloc(ZRVECTOR_SIZEOF_STRUCT(STRATEGY));
 
-		size_t const sdataSize = ZRVector_2SideData_size();
-		char sdata[sdataSize];
-		ZRVector_2SideData_init(sdata, STRATEGY);
-		ZRVector_2SideData_initialSpace(sdata, STRATEGY, 1);
-		ZRVector_init(RESULT, sizeof(long), STRATEGY, sdata);
-		return RESULT;
-	}
-	else
-	{
-		ZRVECTOR_CLEAN(RESULT);
-		free(RESULT);
-		return getResultVector();
-	}
+void deleteVector(ZRVector *vec)
+{
+	ZRVector_clean(vec);
+	ZRFREE(ALLOCATOR, vec->strategy);
+	ZRFREE(ALLOCATOR, vec);
 }
 
 // ============================================================================
@@ -114,8 +80,9 @@ static void FUN_PRINT_NAME(char *out, ZRVector *vec)
 
 MU_TEST(testInsert)
 {
-	ZRVector *result = getResultVector();
-	ZRVector *expected = getExpectedVector();
+	ZRTEST_BEGIN();
+	ZRVector *result = createFixedVector(8, 0);
+	ZRVector *expected = createFixedVector(8, 0);
 	long i[8];
 	i[0] = 100;
 	ZRVector_add(result, i);
@@ -133,6 +100,166 @@ MU_TEST(testInsert)
 	long lexpected[] = { 1000, 1001, 100, 21, 22, 1 };
 	ZRVector_add_nb(expected, sizeof(lexpected) / sizeof(long), lexpected);
 	LOCAL_ZRTEST_END();
+
+	deleteVector(result);
+	deleteVector(expected);
+}
+
+MU_TEST(testSize)
+{
+	ZRTEST_BEGIN();
+	ZRVector *result = createFixedVector(8, 0);
+	long data = 0;
+
+	mu_check(ZRVector_nbObj(result) == 0);
+	ZRVector_add(result, &data), data++;
+	mu_check(ZRVector_nbObj(result) == 1);
+	ZRVector_add(result, &data), data++;
+	mu_check(ZRVector_nbObj(result) == 2);
+
+	deleteVector(result);
+}
+
+MU_TEST(testDynamicGrowArrayInitialIs0)
+{
+	ZRTEST_BEGIN();
+	size_t const nb = 100;
+	size_t const result_initialMemorySize = 2;
+	ZRVector *result = createDynamicVector(0, result_initialMemorySize);
+	ZRVector *expected = createFixedVector(nb, 0);
+
+	for (long i = 0; i < nb; i++)
+	{
+		ZRVector_add(result, &i);
+		ZRVector_add(expected, &i);
+	}
+	LOCAL_ZRTEST_END();
+
+	deleteVector(result);
+	deleteVector(expected);
+}
+
+MU_TEST(testDynamicGrowMemoryInitialIs0)
+{
+	ZRTEST_BEGIN();
+	size_t const nb = 100;
+	size_t const result_initialArraySize = 10;
+	ZRVector *result = createDynamicVector(result_initialArraySize, 0);
+	ZRVector *expected = createFixedVector(nb, 0);
+
+	for (long i = 0; i < nb; i++)
+	{
+		ZRVector_add(result, &i);
+		ZRVector_add(expected, &i);
+	}
+	LOCAL_ZRTEST_END();
+
+	deleteVector(result);
+	deleteVector(expected);
+}
+
+MU_TEST(testDynamicGrow)
+{
+	ZRTEST_BEGIN();
+	size_t const nb = 100;
+	size_t const result_initialArraySize = 10;
+	size_t const result_initialMemorySize = 20;
+	ZRVector *result = createDynamicVector(result_initialArraySize, result_initialMemorySize);
+	ZRVector *expected = createFixedVector(nb, 0);
+
+	for (long i = 0; i < nb; i++)
+	{
+		ZRVector_add(result, &i);
+		ZRVector_add(expected, &i);
+	}
+	LOCAL_ZRTEST_END();
+
+	deleteVector(result);
+	deleteVector(expected);
+}
+
+MU_TEST(testDynamicGrowAddOverflowSizeInitialArray)
+{
+	ZRTEST_BEGIN();
+	size_t const nb = 100;
+	size_t const result_initialArraySize = 10;
+	ZRVector *result = createDynamicVector(result_initialArraySize, 0);
+	ZRVector *expected = createFixedVector(nb, 0);
+
+	for (long i = 0; i < nb; i++)
+	{
+		ZRVector_add(expected, &i);
+	}
+	ZRVector_add_nb(result, nb, expected->array);
+	LOCAL_ZRTEST_END();
+
+	deleteVector(result);
+	deleteVector(expected);
+}
+
+MU_TEST(testDynamicGrowAddOverflowSizeInitialMemory)
+{
+	ZRTEST_BEGIN();
+	size_t const nb = 100;
+	size_t const result_initialMemorySize = 10;
+	ZRVector *result = createDynamicVector(0, result_initialMemorySize);
+	ZRVector *expected = createFixedVector(nb, 0);
+
+	for (long i = 0; i < nb; i++)
+	{
+		ZRVector_add(expected, &i);
+	}
+	ZRVector_add_nb(result, nb, expected->array);
+	LOCAL_ZRTEST_END();
+
+	deleteVector(result);
+	deleteVector(expected);
+}
+
+MU_TEST(testDynamicShrinkLeft)
+{
+	ZRTEST_BEGIN();
+	size_t const nb = 15;
+	size_t const less = 8;
+	size_t const offset = 2;
+	ZRVector *result = createDynamicVector(0, nb);
+	ZRVector *expected = createFixedVector(nb - less, 0);
+
+	for (long i = 0; i < nb; i++)
+	{
+		ZRVector_add(result, &i);
+
+		if (i < offset || i >= offset + less)
+			ZRVector_add(expected, &i);
+	}
+	ZRVector_delete_nb(result, offset, less);
+	LOCAL_ZRTEST_END();
+
+	deleteVector(result);
+	deleteVector(expected);
+}
+
+MU_TEST(testDynamicShrinkRight)
+{
+	ZRTEST_BEGIN();
+	size_t const nb = 15;
+	size_t const less = 8;
+	size_t const offset = 6;
+	ZRVector *result = createDynamicVector(0, nb);
+	ZRVector *expected = createFixedVector(nb - less, 0);
+
+	for (long i = 0; i < nb; i++)
+	{
+		ZRVector_add(result, &i);
+
+		if (i < offset || i >= offset + less)
+			ZRVector_add(expected, &i);
+	}
+	ZRVector_delete_nb(result, offset, less);
+	LOCAL_ZRTEST_END();
+
+	deleteVector(result);
+	deleteVector(expected);
 }
 
 // ============================================================================
@@ -141,16 +268,27 @@ MU_TEST(testInsert)
 
 MU_TEST_SUITE( AllTests)
 {
+	MU_RUN_TEST(testSize);
 	MU_RUN_TEST(testInsert);
+	MU_RUN_TEST(testDynamicGrowArrayInitialIs0);
+	MU_RUN_TEST(testDynamicGrowMemoryInitialIs0);
+	MU_RUN_TEST(testDynamicGrow);
+	MU_RUN_TEST(testDynamicGrowAddOverflowSizeInitialArray);
+	MU_RUN_TEST(testDynamicGrowAddOverflowSizeInitialMemory);
+	MU_RUN_TEST(testDynamicShrinkLeft);
+	MU_RUN_TEST(testDynamicShrinkRight);
 }
 
 int VectorTests(void)
 {
+	ALLOCATOR = malloc(sizeof(*ALLOCATOR));
+	ZRCAllocator_init(ALLOCATOR);
+
 	puts(__FUNCTION__);
 	MU_SUITE_CONFIGURE(testSetup, NULL);
 	MU_RUN_SUITE(AllTests);
 	MU_REPORT()
 	;
-	testShutdown();
+	free(ALLOCATOR);
 	return minunit_status;
 }
