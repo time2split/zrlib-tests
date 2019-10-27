@@ -32,9 +32,7 @@ ZRVector* createDynamicVector(size_t initialArraySize, size_t initialMemorySize)
 
 void deleteVector(ZRVector *vec)
 {
-	ZRVector_clean(vec);
-	ZRFREE(ALLOCATOR, vec->strategy);
-	ZRFREE(ALLOCATOR, vec);
+	ZRVector2SideStrategy_delete(vec);
 }
 
 // ============================================================================
