@@ -118,18 +118,28 @@ MU_TEST(testSetBits)
 
 MU_TEST(testGetlMask)
 {
-	ZRBits expected[2] =
-		{ 0, GUARD_BITS };
-	ZRBits local[2] =
-		{ 0, GUARD_BITS };
-
-	for (int i = 0; i <= ZRBITS_NBOF; i++)
+	ZRBits (*getLMask[])(size_t) =
+	{ //
+			ZRBits_getLMask_std,
+#ifdef ZRBITS_INTRINSIC
+		ZRBits_getLMask_i,
+#endif
+	};
+	for (int fun_i = 0; fun_i < ZRCARRAY_NBOBJ(getLMask); fun_i++)
 	{
-		*local = ZRBits_getLMask(i);
-		ZRTEST_BEGIN();
-		ZRTEST_END(MESSAGE_BUFF, local, expected);
-		*expected >>= 1;
-		*expected |= ZRBITS_MASK_1L;
+		ZRBits expected[2] = { 0, GUARD_BITS };
+		ZRBits local[2] = { 0, GUARD_BITS };
+		char msg[100];
+
+		for (int i = 0; i <= ZRBITS_NBOF; i++)
+		{
+			*local = getLMask[fun_i](i);
+			sprintf(msg, "fun=%d", fun_i);
+			ZRTEST_BEGIN_MSG(msg);
+			ZRTEST_END(MESSAGE_BUFF, local, expected);
+			*expected >>= 1;
+			*expected |= ZRBITS_MASK_1L;
+		}
 	}
 }
 
