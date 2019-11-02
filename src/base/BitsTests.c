@@ -478,6 +478,30 @@ MU_TEST(testInArrayShift)
 }
 
 // ============================================================================
+// SEARCH
+// ============================================================================
+
+MU_TEST(testSearch)
+{
+	const size_t nb = 10;
+	const size_t nbBits = 4;
+	const size_t offsetBloc = 1;
+	const size_t offsetBits = 3;
+	ZRBits haystack[nb];
+
+	ZRARRAYOP_FILL(haystack, sizeof(ZRBits), nb, &(ZRBits ) { 0 });
+	ZRBits_setBitsFromTheRight(haystack + offsetBloc, offsetBits, nbBits, ZRBits_getRMask(nbBits));
+
+	ZRBits *search;
+	size_t pos;
+	ZRBits_searchFixedPattern(haystack, 0, nb, nbBits, &search, &pos);
+
+	ZRTEST_BEGIN();
+	mu_check(search == haystack + offsetBloc);
+	mu_check(pos == offsetBits);
+}
+
+// ============================================================================
 // TESTS
 // ============================================================================
 
@@ -494,6 +518,7 @@ MU_TEST_SUITE(AllTests)
 	MU_RUN_TEST(testGetOneBits);
 	MU_RUN_TEST(testGetBits);
 	MU_RUN_TEST(testInArrayShift);
+	MU_RUN_TEST(testSearch);
 }
 
 int BitsTests(void)
