@@ -186,6 +186,81 @@ MU_TEST(testPack)
 		ZRTEST_END(MESSAGE_BUFF, local, expected);
 	}
 }
+
+// ============================================================================
+// 1POS
+// ============================================================================
+
+MU_TEST(test1RPos)
+{
+	size_t result;
+	size_t const nbZRBits = 2;
+	ZRBits local_a[][2] = { //
+		{ ZRBITS_MASK_1L >> 1, 0 }, //
+		{ ZRBITS_MASK_1L >> 1, ZRBITS_MASK_1R }, //
+		};
+	size_t pos_a[] = { //
+		0, //
+		1, //
+		};
+	size_t expected_a[] = { //
+		ZRBITS_NBOF * 2 - 2, //
+		ZRBITS_NBOF * 2 - 2, //
+		};
+
+	for (unsigned i = 0; i < ZRCARRAY_NBOBJ(expected_a); i++)
+	{
+		ZRBits *local = local_a[i];
+		size_t expected = expected_a[i];
+
+		ZRTEST_PRINTF("[%u] pos=%u expected=%u", i, (unsigned )pos_a[i], (unsigned )expected);
+		result = ZRBits_1RPos(local, nbZRBits, pos_a[i]);
+
+		if (result != expected)
+		{
+			sprintf(MESSAGE_BUFF, "%s, have %u", FUN_PREFIX, (unsigned)result);
+			fputs(MESSAGE_BUFF, stderr);
+			fflush(stderr);
+			mu_fail(MESSAGE_BUFF);
+		}
+	}
+}
+
+MU_TEST(test1LPos)
+{
+	size_t result;
+	size_t const nbZRBits = 2;
+	ZRBits local_a[][2] = { //
+		{ 0, ZRBITS_MASK_1R << 1 }, //
+		{ ZRBITS_MASK_1L, ZRBITS_MASK_1R << 1 }, //
+		};
+	size_t pos_a[] = { //
+		0, //
+		1, //
+		};
+	size_t expected_a[] = { //
+		ZRBITS_NBOF * 2 - 2, //
+		ZRBITS_NBOF * 2 - 2, //
+		};
+
+	for (unsigned i = 0; i < ZRCARRAY_NBOBJ(expected_a); i++)
+	{
+		ZRBits *local = local_a[i];
+		size_t expected = expected_a[i];
+
+		ZRTEST_PRINTF("[%u] pos=%u expected=%u", i, (unsigned )pos_a[i], (unsigned )expected);
+		result = ZRBits_1LPos(local, nbZRBits, pos_a[i]);
+
+		if (result != expected)
+		{
+			sprintf(MESSAGE_BUFF, "%s, have %u", FUN_PREFIX, (unsigned)result);
+			fputs(MESSAGE_BUFF, stderr);
+			fflush(stderr);
+			mu_fail(MESSAGE_BUFF);
+		}
+	}
+}
+
 // ============================================================================
 // COPY
 // ============================================================================
@@ -486,7 +561,6 @@ MU_TEST(testSearch)
 {
 	ZRBits *search;
 	size_t pos;
-
 	{
 		const size_t nb = 10;
 		const size_t nbBits = 4;
@@ -572,6 +646,8 @@ MU_TEST_SUITE(AllTests)
 {
 	MU_RUN_TEST(testGetlMask);
 	MU_RUN_TEST(testGetrMask);
+	MU_RUN_TEST(test1LPos);
+	MU_RUN_TEST(test1RPos);
 	MU_RUN_TEST(testSetBits);
 	MU_RUN_TEST(testPack);
 	MU_RUN_TEST(testGetBit);
