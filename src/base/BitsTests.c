@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include <zrlib/base/Bits.h>
+#include <zrlib/base/Bits/Bits.h>
 
 #include "../main.h"
 
