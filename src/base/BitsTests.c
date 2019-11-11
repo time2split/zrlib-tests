@@ -111,7 +111,7 @@ MU_TEST(testSetBits)
 
 MU_TEST(testGetlMask)
 {
-	ZRBits (*getLMask[])(size_t) =
+	ZRBits (*getLMask[])(unsigned) =
 	{ //
 			ZRBits_getLMask_std,
 #ifdef ZRBITS_INTRINSIC
@@ -497,7 +497,7 @@ MU_TEST(testSearch)
 		ZRARRAYOP_FILL(haystack, sizeof(ZRBits), nb, &(ZRBits ) { 0 });
 		ZRBits_setBitsFromTheRight(haystack + offsetBloc, offsetBits, nbBits, ZRBits_getRMask(nbBits));
 
-		ZRTEST_PRINTF("pos=%zu nbBits=%zu", pos, nbBits);
+		ZRTEST_PRINTF("nb=%zu nbBits=%zu", nb, nbBits);
 		ZRBits_searchFixedPattern(haystack, 0, nb, nbBits, &search, &pos);
 		mu_check(search == haystack + offsetBloc);
 		mu_check(pos == offsetBits);
@@ -512,7 +512,52 @@ MU_TEST(testSearch)
 		ZRARRAYOP_FILL(haystack, sizeof(ZRBits), nb, &(ZRBits ) { 0 });
 		ZRBits_setBitsFromTheRight(haystack + offsetBloc, offsetBits, nbBits, ZRBits_getRMask(nbBits));
 
-		ZRTEST_BEGIN();
+		ZRTEST_PRINTF("nb=%zu nbBits=%zu", nb, nbBits);
+		ZRBits_searchFixedPattern(haystack, 0, nb, nbBits, &search, &pos);
+		mu_check(search == haystack + offsetBloc);
+		mu_check(pos == offsetBits);
+	}
+	{
+		const size_t nb = 10;
+		const size_t nbBits = ZRBITS_NBOF;
+		const size_t offsetBloc = 5;
+		const size_t offsetBits = 0;
+		ZRBits haystack[nb];
+
+		ZRARRAYOP_FILL(haystack, sizeof(ZRBits), nb, &(ZRBits ) { 0 });
+		ZRBits_setBitsFromTheRight(haystack + offsetBloc, offsetBits, nbBits, ZRBits_getRMask(nbBits));
+
+		ZRTEST_PRINTF("nb=%zu nbBits=%zu", nb, nbBits);
+		ZRBits_searchFixedPattern(haystack, 0, nb, nbBits, &search, &pos);
+		mu_check(search == haystack + offsetBloc);
+		mu_check(pos == offsetBits);
+	}
+	{
+		const size_t nb = 10;
+		const size_t nbBits = ZRBITS_NBOF;
+		const size_t offsetBloc = 5;
+		const size_t offsetBits = 13;
+		ZRBits haystack[nb];
+
+		ZRARRAYOP_FILL(haystack, sizeof(ZRBits), nb, &(ZRBits ) { 0 });
+		ZRBits_setBitsFromTheRight(haystack + offsetBloc, offsetBits, nbBits, ZRBits_getRMask(nbBits));
+
+		ZRTEST_PRINTF("nb=%zu nbBits=%zu", nb, nbBits);
+		ZRBits_searchFixedPattern(haystack, 0, nb, nbBits, &search, &pos);
+		mu_check(search == haystack + offsetBloc);
+		mu_check(pos == offsetBits);
+	}
+	{
+		const size_t nb = 10;
+		const size_t nbBits = ZRBITS_NBOF + 1;
+		const size_t offsetBloc = 2;
+		const size_t offsetBits = 13;
+		ZRBits haystack[nb];
+
+		ZRARRAYOP_FILL(haystack, sizeof(ZRBits), nb, &(ZRBits ) { 0 });
+		ZRBits_fill(haystack + offsetBloc, offsetBits, nbBits);
+
+		ZRTEST_PRINTF("nb=%zu nbBits=%zu", nb, nbBits);
 		ZRBits_searchFixedPattern(haystack, 0, nb, nbBits, &search, &pos);
 		mu_check(search == haystack + offsetBloc);
 		mu_check(pos == offsetBits);
