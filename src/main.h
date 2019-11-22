@@ -22,6 +22,11 @@ extern char FUN_PREFIX[];
 #define ZRTEST_BEGIN_MSG(MSG) \
 	sprintf(FUN_PREFIX, "%s:\n%s\n", __FUNCTION__, MSG)
 
+#define ZRTEST_PRINTF(MSG, ...) \
+do{ \
+	sprintf(FUN_PREFIX, "%s: " MSG, __FUNCTION__, __VA_ARGS__); \
+}while(0)
+
 #define ZRTEST_END(msg_buffer, result, expected) \
 	ZRTEST_RESULT(FUN_PREFIX, msg_buffer, result, expected)
 
