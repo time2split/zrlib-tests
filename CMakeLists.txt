@@ -14,6 +14,9 @@ set(SRCS
 	src/base/MemoryOpTests.c
 	src/base/MPoolTests.c
 	src/base/Vector/VectorTests.c
+	src/benchmark/versus/Bits_naiveVsIntrinsic.c
+	src/benchmark/versus/PoolVsMalloc.c
+	src/benchmark/versus/Reserve_listVsBits.c
     )
     
 set(HEADERS
