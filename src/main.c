@@ -9,6 +9,7 @@
 #include "base/MapTests.h"
 #include "base/MemoryOpTests.h"
 #include "base/MPoolTests.h"
+#include "base/Tree/TreeTests.h"
 #include "base/Vector/VectorTests.h"
 
 char MESSAGE_BUFF[2048];
@@ -24,6 +25,7 @@ int main(int argc, char **argv)
 			VectorTests,//
 			MapTests,//
 			MPoolTests,//
+			TreeTests,//
 	};
 	int i = 0;
 	const int nbof = sizeof(testSuites) / sizeof(*testSuites);
