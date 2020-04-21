@@ -15,6 +15,7 @@ set(SRCS
 	src/base/MPoolTests.c
 	src/base/Tree/TreeTests.c
 	src/base/Vector/VectorTests.c
+	src/benchmark/versus/Address_pow2VsArithmetic.c
 	src/benchmark/versus/Bits_naiveVsIntrinsic.c
 	src/benchmark/versus/PoolVsMalloc.c
 	src/benchmark/versus/Reserve_listVsBits.c
