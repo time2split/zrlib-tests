@@ -55,7 +55,7 @@ int PoolVsMalloc(int argc, char **argv)
 	}
 
 	printf("naive:%ld ; %LE pool:%ld %LE\n", time_naive, (long double)time_naive / nb, time_intrinsic, (long double)time_intrinsic / nb);
-	ZRMPoolDS_destroy(pool);
+	ZRMPool_destroy(pool);
 	free(allocator);
 	return 0;
 }

@@ -25,7 +25,7 @@ MU_TEST(testGet)
 	size_t (*fhash_a[])(void*) =
 	{	(fhash_t) fhash };
 
-	ZRMap *map = ZRHashTable_create(keySize, valueSize, ZRCARRAY_NBOBJ(fhash_a), fhash_a, NULL, NULL, ALLOCATOR);
+	ZRMap *map = ZRHashTable_create(keySize, alignof(char), valueSize, alignof(int), ZRCARRAY_NBOBJ(fhash_a), fhash_a, NULL, ALLOCATOR);
 
 	char key = 'a';
 	int val = 0;

@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 		int status = testSuites[i]();
 
 		if (status)
-			fprintf(stderr, "Error for test suite %d, status %d", i, status);
+			fprintf(stderr, "Error for test suite %d, status %d\n", i, status);
 	}
 	return 0;
 }
