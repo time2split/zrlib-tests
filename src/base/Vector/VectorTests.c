@@ -32,7 +32,7 @@ ZRVector* createDynamicVector(size_t initialArraySize, size_t initialMemorySize)
 
 void deleteVector(ZRVector *vec)
 {
-	ZRVector2SideStrategy_destroy(vec);
+	ZRVector_destroy(vec);
 }
 
 // ============================================================================
@@ -67,7 +67,7 @@ static void FUN_PRINT_NAME(char *out, ZRVector *vec)
 
 	while (nbObj--)
 	{
-		long* l = ZRVector_get(vec, i);
+		long *l = ZRVector_get(vec, i);
 		sprintf(buff, "%s%ld", (i ? "," : ""), *l);
 		strcat(out, buff);
 		i++;
@@ -260,6 +260,31 @@ MU_TEST(testDynamicShrinkRight)
 	deleteVector(expected);
 }
 
+MU_TEST(testTrim)
+{
+	ZRTEST_BEGIN();
+	size_t const nb = 15;
+	size_t const capacity = nb * 3;
+	ZRVector *result = createDynamicVector(0, capacity);
+
+	for (long i = 0; i < nb; i++)
+	{
+		ZRVector_add(result, &i);
+	}
+	mu_check(capacity - nb <= result->capacity);
+	mu_assert_int_eq(nb, result->nbObj);
+
+	ZRVector_memoryTrim(result);
+	mu_assert_int_eq(nb, result->capacity);
+	mu_assert_int_eq(nb, result->nbObj);
+
+	ZRVector_add(result, (int[] ) { 12 });
+	mu_check(nb <= result->capacity);
+	mu_assert_int_eq(nb + 1, result->nbObj);
+
+	deleteVector(result);
+}
+
 // ============================================================================
 // TESTS
 // ============================================================================
@@ -275,6 +300,7 @@ MU_TEST_SUITE( AllTests)
 	MU_RUN_TEST(testDynamicGrowAddOverflowSizeInitialMemory);
 	MU_RUN_TEST(testDynamicShrinkLeft);
 	MU_RUN_TEST(testDynamicShrinkRight);
+	MU_RUN_TEST(testTrim);
 }
 
 int VectorTests(void)
