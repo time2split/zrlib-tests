@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdalign.h>
 #include <minunit/minunit.h>
 
 #include <zrlib/base/MemoryPool/MemoryPool.h>
@@ -21,22 +22,35 @@ ZRMemoryPool* testGet_createDynamic(void)
 	return ZRMPoolDS_createBS(1, sizeof(double), ALLOCATOR);
 }
 
-ZRMemoryPool* testGet_createReserve()
+ZRMemoryPool* testGet_createReserveBits()
 {
-	return ZRMPoolReserve_create(sizeof(double), testGet_nb, ALLOCATOR);
+	return ZRMPoolReserve_create(sizeof(double), alignof(double), testGet_nb, ALLOCATOR, ZRMPoolReserveMode_bits);
+}
+
+ZRMemoryPool* testGet_createReserveChunk()
+{
+	return ZRMPoolReserve_create(sizeof(double), alignof(double), testGet_nb, ALLOCATOR, ZRMPoolReserveMode_chunk);
+}
+
+ZRMemoryPool* testGet_createReserveList()
+{
+	return ZRMPoolReserve_create(sizeof(double), alignof(double), testGet_nb, ALLOCATOR, ZRMPoolReserveMode_list);
 }
 
 MU_TEST(testGet)
 {
 	size_t const nb = testGet_nb;
+	size_t const releaseNb = testGet_nb / 2;
 
 	struct
 	{
 		ZRMemoryPool* (*create)(void);
 		void (*destroy)(ZRMemoryPool*);
 	} pools[] = { //
-		{ testGet_createDynamic, ZRMPoolDS_destroy }, //
-		{ testGet_createReserve, ZRMPoolReserve_destroy }, //
+//		{ testGet_createDynamic }, //
+//		{ testGet_createReserveBits }, //
+		{ testGet_createReserveChunk }, //
+//		{ testGet_createReserveList }, //
 		};
 
 	for (size_t i = 0; i < ZRCARRAY_NBOBJ(pools); i++)
@@ -44,11 +58,23 @@ MU_TEST(testGet)
 		ZRMemoryPool *pool = pools[i].create();
 		double *val = ZRMPool_reserve_nb(pool, nb);
 
+		if(val == NULL)
+			mu_fail("Error poll cannot allocate block");
+
+		mu_assert_int_eq(nb, ZRMPool_areaNbBlocks(pool, val));
+
 		for (int i = 0; i < nb; i++)
 			val[i] = i;
 
-		ZRMPool_release_nb(pool, &val[1], 2);
-		pools[i].destroy(pool);
+		ZRMPool_release_nb(pool, val, releaseNb);
+		mu_assert_int_eq(nb - releaseNb, ZRMPool_areaNbBlocks(pool, &val[releaseNb]));
+
+		double *val2 = ZRMPool_reserve_nb(pool, releaseNb);
+
+		if(val2 == NULL)
+			mu_fail("Error poll cannot allocate block");
+
+		ZRMPool_destroy(pool);
 	}
 }
 
