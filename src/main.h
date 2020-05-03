@@ -13,6 +13,9 @@ extern char FUN_PREFIX[];
 #define FUN_PRINT_NAME \
 	printResult
 
+#define ZRTEST_RESULT_6(prefix, msg_buffer, result, expected, fcmp, fprint) \
+	testResult(prefix, msg_buffer, result, expected, fcmp, fprint)
+
 #define ZRTEST_RESULT(prefix, msg_buffer, result, expected) \
 	testResult(prefix, msg_buffer, result, expected, (int (*)(void*, void*))FUN_CMP_NAME, (void (*)(char*, void*))FUN_PRINT_NAME)
 
@@ -25,6 +28,11 @@ extern char FUN_PREFIX[];
 #define ZRTEST_PRINTF(MSG, ...) \
 do{ \
 	sprintf(FUN_PREFIX, "%s: " MSG, __FUNCTION__, __VA_ARGS__); \
+}while(0)
+
+#define ZRTEST_CHECK(COND) \
+do{ \
+	if(!(COND)) mu_fail(FUN_PREFIX); \
 }while(0)
 
 #define ZRTEST_END(msg_buffer, result, expected) \
