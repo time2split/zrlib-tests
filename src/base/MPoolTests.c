@@ -19,22 +19,22 @@ size_t const testGet_nb = 15;
 
 ZRMemoryPool* testGet_createDynamic(void)
 {
-	return ZRMPoolDS_createBS(1, sizeof(double), ALLOCATOR);
+	return ZRMPoolDS_createBS(1, ZRTYPE_SIZE_ALIGNMENT(double), ALLOCATOR);
 }
 
 ZRMemoryPool* testGet_createReserveBits()
 {
-	return ZRMPoolReserve_create(sizeof(double), alignof(double), testGet_nb, ALLOCATOR, ZRMPoolReserveMode_bits);
+	return ZRMPoolReserve_createSimple(ZRTYPE_SIZE_ALIGNMENT(double), testGet_nb, ALLOCATOR, ZRMPoolReserveMode_bits);
 }
 
 ZRMemoryPool* testGet_createReserveChunk()
 {
-	return ZRMPoolReserve_create(sizeof(double), alignof(double), testGet_nb, ALLOCATOR, ZRMPoolReserveMode_chunk);
+	return ZRMPoolReserve_createSimple(ZRTYPE_SIZE_ALIGNMENT(double), testGet_nb, ALLOCATOR, ZRMPoolReserveMode_chunk);
 }
 
 ZRMemoryPool* testGet_createReserveList()
 {
-	return ZRMPoolReserve_create(sizeof(double), alignof(double), testGet_nb, ALLOCATOR, ZRMPoolReserveMode_list);
+	return ZRMPoolReserve_createSimple(sizeof(double), alignof(double), testGet_nb, ALLOCATOR, ZRMPoolReserveMode_list);
 }
 
 MU_TEST(testGet)
@@ -47,10 +47,10 @@ MU_TEST(testGet)
 		ZRMemoryPool* (*create)(void);
 		void (*destroy)(ZRMemoryPool*);
 	} pools[] = { //
-//		{ testGet_createDynamic }, //
-//		{ testGet_createReserveBits }, //
+		{ testGet_createDynamic }, //
+		{ testGet_createReserveBits }, //
 		{ testGet_createReserveChunk }, //
-//		{ testGet_createReserveList }, //
+		{ testGet_createReserveList }, //
 		};
 
 	for (size_t i = 0; i < ZRCARRAY_NBOBJ(pools); i++)
