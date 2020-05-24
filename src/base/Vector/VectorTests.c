@@ -1,4 +1,5 @@
 #include <minunit/minunit.h>
+#include <stdint.h>
 
 #include <zrlib/base/Vector/Vector.h>
 #include <zrlib/base/Allocator/CAllocator.h>
@@ -22,12 +23,17 @@ static void testSetup()
 
 ZRVector* createFixedVector(size_t initialArraySize, size_t initialMemorySize)
 {
-	return ZRVector2SideStrategy_createFixedM(initialArraySize, initialMemorySize, sizeof(long), ALLOCATOR);
+	return ZRVector2SideStrategy_createFixedM(initialArraySize, initialMemorySize, ZRTYPE_SIZE_ALIGNMENT(long), ALLOCATOR);
 }
 
-ZRVector* createDynamicVector(size_t initialArraySize, size_t initialMemorySize)
+ZRVector* createLongDynamicVector(size_t initialArraySize, size_t initialMemorySize)
 {
-	return ZRVector2SideStrategy_createDynamicM(initialArraySize, initialMemorySize, sizeof(long), ALLOCATOR);
+	return ZRVector2SideStrategy_createDynamicM(initialArraySize, initialMemorySize, ZRTYPE_SIZE_ALIGNMENT(long), ALLOCATOR);
+}
+
+ZRVector* createDynamicVector(size_t initialArraySize, size_t initialMemorySize, size_t objSize, size_t objAlignment)
+{
+	return ZRVector2SideStrategy_createDynamicM(initialArraySize, initialMemorySize, objSize, objAlignment, ALLOCATOR);
 }
 
 void deleteVector(ZRVector *vec)
@@ -123,7 +129,7 @@ MU_TEST(testDynamicGrowArrayInitialIs0)
 	ZRTEST_BEGIN();
 	size_t const nb = 100;
 	size_t const result_initialMemorySize = 2;
-	ZRVector *result = createDynamicVector(0, result_initialMemorySize);
+	ZRVector *result = createLongDynamicVector(0, result_initialMemorySize);
 	ZRVector *expected = createFixedVector(nb, 0);
 
 	for (long i = 0; i < nb; i++)
@@ -142,7 +148,7 @@ MU_TEST(testDynamicGrowMemoryInitialIs0)
 	ZRTEST_BEGIN();
 	size_t const nb = 100;
 	size_t const result_initialArraySize = 10;
-	ZRVector *result = createDynamicVector(result_initialArraySize, 0);
+	ZRVector *result = createLongDynamicVector(result_initialArraySize, 0);
 	ZRVector *expected = createFixedVector(nb, 0);
 
 	for (long i = 0; i < nb; i++)
@@ -162,7 +168,7 @@ MU_TEST(testDynamicGrow)
 	size_t const nb = 100;
 	size_t const result_initialArraySize = 10;
 	size_t const result_initialMemorySize = 20;
-	ZRVector *result = createDynamicVector(result_initialArraySize, result_initialMemorySize);
+	ZRVector *result = createLongDynamicVector(result_initialArraySize, result_initialMemorySize);
 	ZRVector *expected = createFixedVector(nb, 0);
 
 	for (long i = 0; i < nb; i++)
@@ -181,7 +187,7 @@ MU_TEST(testDynamicGrowAddOverflowSizeInitialArray)
 	ZRTEST_BEGIN();
 	size_t const nb = 100;
 	size_t const result_initialArraySize = 10;
-	ZRVector *result = createDynamicVector(result_initialArraySize, 0);
+	ZRVector *result = createLongDynamicVector(result_initialArraySize, 0);
 	ZRVector *expected = createFixedVector(nb, 0);
 
 	for (long i = 0; i < nb; i++)
@@ -200,7 +206,7 @@ MU_TEST(testDynamicGrowAddOverflowSizeInitialMemory)
 	ZRTEST_BEGIN();
 	size_t const nb = 100;
 	size_t const result_initialMemorySize = 10;
-	ZRVector *result = createDynamicVector(0, result_initialMemorySize);
+	ZRVector *result = createLongDynamicVector(0, result_initialMemorySize);
 	ZRVector *expected = createFixedVector(nb, 0);
 
 	for (long i = 0; i < nb; i++)
@@ -220,7 +226,7 @@ MU_TEST(testDynamicShrinkLeft)
 	size_t const nb = 15;
 	size_t const less = 8;
 	size_t const offset = 2;
-	ZRVector *result = createDynamicVector(0, nb);
+	ZRVector *result = createLongDynamicVector(0, nb);
 	ZRVector *expected = createFixedVector(nb - less, 0);
 
 	for (long i = 0; i < nb; i++)
@@ -243,7 +249,7 @@ MU_TEST(testDynamicShrinkRight)
 	size_t const nb = 15;
 	size_t const less = 8;
 	size_t const offset = 6;
-	ZRVector *result = createDynamicVector(0, nb);
+	ZRVector *result = createLongDynamicVector(0, nb);
 	ZRVector *expected = createFixedVector(nb - less, 0);
 
 	for (long i = 0; i < nb; i++)
@@ -265,7 +271,7 @@ MU_TEST(testTrim)
 	ZRTEST_BEGIN();
 	size_t const nb = 15;
 	size_t const capacity = nb * 3;
-	ZRVector *result = createDynamicVector(0, capacity);
+	ZRVector *result = createLongDynamicVector(0, capacity);
 
 	for (long i = 0; i < nb; i++)
 	{
@@ -285,6 +291,32 @@ MU_TEST(testTrim)
 	deleteVector(result);
 }
 
+MU_TEST(testChangeSize)
+{
+#define T1 char
+#define T2 uint64_t
+
+	ZRTEST_BEGIN();
+	size_t const nb = 100;
+	size_t const capacity = nb * 3;
+	ZRVector *result = createDynamicVector(capacity, capacity, sizeof(T1), 7);
+
+	for (T1 i = 0; i < nb; i++)
+		ZRVector_add(result, &i);
+
+	mu_assert_int_eq(nb, result->nbObj);
+	ZRVector_changeObjSize(result, ZRTYPE_SIZE_ALIGNMENT(T2));
+	mu_assert_int_eq(0, result->nbObj);
+
+	for (T2 i = 0; i < nb; i++)
+		ZRVector_add(result, &i);
+
+	mu_assert_int_eq(nb, result->nbObj);
+	deleteVector(result);
+#undef T1
+#undef T2
+}
+
 // ============================================================================
 // TESTS
 // ============================================================================
@@ -301,6 +333,7 @@ MU_TEST_SUITE( AllTests)
 	MU_RUN_TEST(testDynamicShrinkLeft);
 	MU_RUN_TEST(testDynamicShrinkRight);
 	MU_RUN_TEST(testTrim);
+	MU_RUN_TEST(testChangeSize);
 }
 
 int VectorTests(void)
