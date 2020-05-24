@@ -28,10 +28,10 @@ int PoolVsMalloc(int argc, char **argv)
 		char *name;
 		ZRMemoryPool *pool;
 	} pools[] = { //
-		"bits", ZRMPoolReserve_create(allocSize, alignof(max_align_t), initialBSize, allocator, ZRMPoolReserveMode_bits), //
-		"list", ZRMPoolReserve_create(allocSize, alignof(max_align_t), initialBSize, allocator, ZRMPoolReserveMode_list), //
-		"chunk", ZRMPoolReserve_create(allocSize, alignof(max_align_t), initialBSize, allocator, ZRMPoolReserveMode_chunk), //
-		"Dyn:chunk", ZRMPoolDS_create(initialBSize, maxFreeBuckets, allocSize, allocator), //
+		"bits", ZRMPoolReserve_createSimple(allocSize, alignof(max_align_t), initialBSize, allocator, ZRMPoolReserveMode_bits), //
+		"list", ZRMPoolReserve_createSimple(allocSize, alignof(max_align_t), initialBSize, allocator, ZRMPoolReserveMode_list), //
+		"chunk", ZRMPoolReserve_createSimple(allocSize, alignof(max_align_t), initialBSize, allocator, ZRMPoolReserveMode_chunk), //
+		"Dyn:chunk", ZRMPoolDS_create(initialBSize, maxFreeBuckets, allocSize, alignof(max_align_t), allocator), //
 		};
 
 	char *p[nbObj];
