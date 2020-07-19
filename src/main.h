@@ -20,7 +20,7 @@ extern char FUN_PREFIX[];
 	testResult(prefix, msg_buffer, result, expected, (int (*)(void*, void*))FUN_CMP_NAME, (void (*)(char*, void*))FUN_PRINT_NAME)
 
 #define ZRTEST_BEGIN() \
-	sprintf(FUN_PREFIX, "%s:\n", __FUNCTION__)
+	sprintf(FUN_PREFIX, "(in %s()) ", __FUNCTION__)
 
 #define ZRTEST_BEGIN_MSG(MSG) \
 	sprintf(FUN_PREFIX, "%s:\n%s\n", __FUNCTION__, MSG)
@@ -43,14 +43,24 @@ do{ \
 	TYPE _e = (E); \
 	TYPE _r = (R); \
 	\
-	if(!(_e OP _r)) { \
-		sprintf(FUN_PREFIX, "%sExpected " #OP PRINT " but have " PRINT "\n", FUN_PREFIX, _e, _r); \
+	if(!(_r OP _e)) { \
+		sprintf(FUN_PREFIX, "%s" #E #OP #R "\n\tExpected " #OP PRINT " but have " PRINT "\n", FUN_PREFIX, _e, _r); \
 		mu_fail(FUN_PREFIX); \
 	} \
 }while(0)
 
 #define ZRTEST_ASSERT_INT_EQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,int,==,"%d")
-#define ZRTEST_ASSERT_INT_NEQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,int,!=,"%d")
+#define ZRTEST_ASSERT_INT_NE(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,int,!=,"%d")
+#define ZRTEST_ASSERT_INT_GE(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,int,>=,"%d")
+#define ZRTEST_ASSERT_INT_LE(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,int,<=,"%d")
+
+#define ZRTEST_ASSERT_INT_RANGE(A,B,R) do{ \
+	ZRTEST_ASSERT_INT_GE(A,R); \
+	ZRTEST_ASSERT_INT_LE(B,R); \
+}while(0)
+
+#define ZRTEST_ASSERT_CHAR_EQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,char,==,"%c")
+#define ZRTEST_ASSERT_CHAR_NEQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,char,!=,"%c")
 
 #define ZRTEST_ASSERT_PTR_EQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,void*,==,"%p")
 #define ZRTEST_ASSERT_PTR_NEQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,void*,!=,"%p")
