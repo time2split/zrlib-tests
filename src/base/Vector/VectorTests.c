@@ -23,7 +23,7 @@ static void testSetup()
 
 ZRVector* createFixedVector(size_t initialArraySize, size_t initialMemorySize)
 {
-	return ZRVector2SideStrategy_createFixedM(initialArraySize, initialMemorySize, ZRTYPE_SIZE_ALIGNMENT(long), ALLOCATOR);
+	return ZRVector2SideStrategy_createFixed(initialArraySize, ZRTYPE_SIZE_ALIGNMENT(long), ALLOCATOR);
 }
 
 ZRVector* createLongDynamicVector(size_t initialArraySize, size_t initialMemorySize)
@@ -194,7 +194,7 @@ MU_TEST(testDynamicGrowAddOverflowSizeInitialArray)
 	{
 		ZRVector_add(expected, &i);
 	}
-	ZRVector_add_nb(result, nb, expected->array);
+	ZRVector_add_nb(result, nb, ZRVECTOR_PARRAY(expected));
 	LOCAL_ZRTEST_END();
 
 	deleteVector(result);
@@ -213,7 +213,7 @@ MU_TEST(testDynamicGrowAddOverflowSizeInitialMemory)
 	{
 		ZRVector_add(expected, &i);
 	}
-	ZRVector_add_nb(result, nb, expected->array);
+	ZRVector_add_nb(result, nb, ZRVECTOR_PARRAY(expected));
 	LOCAL_ZRTEST_END();
 
 	deleteVector(result);
@@ -277,16 +277,16 @@ MU_TEST(testTrim)
 	{
 		ZRVector_add(result, &i);
 	}
-	mu_check(capacity - nb <= result->capacity);
-	mu_assert_int_eq(nb, result->nbObj);
+	mu_check(capacity - nb <= ZRVECTOR_SIZE(result));
+	mu_assert_int_eq(nb, ZRVECTOR_NBOBJ(result));
 
 	ZRVector_memoryTrim(result);
-	mu_assert_int_eq(nb, result->capacity);
-	mu_assert_int_eq(nb, result->nbObj);
+	mu_assert_int_eq(nb, ZRVECTOR_SIZE(result));
+	mu_assert_int_eq(nb, ZRVECTOR_NBOBJ(result));
 
 	ZRVector_add(result, (int[] ) { 12 });
-	mu_check(nb <= result->capacity);
-	mu_assert_int_eq(nb + 1, result->nbObj);
+	mu_check(nb <= ZRVECTOR_SIZE(result));
+	mu_assert_int_eq(nb + 1, ZRVECTOR_NBOBJ(result));
 
 	deleteVector(result);
 }
@@ -304,17 +304,40 @@ MU_TEST(testChangeSize)
 	for (T1 i = 0; i < nb; i++)
 		ZRVector_add(result, &i);
 
-	mu_assert_int_eq(nb, result->nbObj);
+	mu_assert_int_eq(nb, ZRVECTOR_NBOBJ(result));
 	ZRVector_changeObjSize(result, ZRTYPE_SIZE_ALIGNMENT(T2));
-	mu_assert_int_eq(0, result->nbObj);
+	mu_assert_int_eq(0, ZRVECTOR_NBOBJ(result));
 
 	for (T2 i = 0; i < nb; i++)
 		ZRVector_add(result, &i);
 
-	mu_assert_int_eq(nb, result->nbObj);
+	mu_assert_int_eq(nb, ZRVECTOR_NBOBJ(result));
 	deleteVector(result);
 #undef T1
 #undef T2
+}
+
+MU_TEST(testStress)
+{
+	ZRTEST_BEGIN();
+#define T1 int
+
+	ZRTEST_BEGIN();
+	size_t const nb = 10000;
+	size_t const nb_rest = 13;
+	size_t const capacity = nb * 3;
+	ZRVector *result = createDynamicVector(0, 1, ZRTYPE_SIZE_ALIGNMENT(T1));
+
+	for (T1 i = 0; i < nb; i++)
+		ZRVector_add(result, &i);
+
+	mu_assert_int_eq(nb, ZRVECTOR_NBOBJ(result));
+
+	for (T1 i = 0; i < nb - nb_rest; i++)
+		ZRVector_dec(result);
+
+	mu_assert_int_eq(nb_rest, ZRVECTOR_NBOBJ(result));
+	deleteVector(result);
 }
 
 // ============================================================================
@@ -334,6 +357,7 @@ MU_TEST_SUITE( AllTests)
 	MU_RUN_TEST(testDynamicShrinkRight);
 	MU_RUN_TEST(testTrim);
 	MU_RUN_TEST(testChangeSize);
+	MU_RUN_TEST(testStress);
 }
 
 int VectorTests(void)
@@ -345,7 +369,7 @@ int VectorTests(void)
 	MU_SUITE_CONFIGURE(testSetup, NULL);
 	MU_RUN_SUITE(AllTests);
 	MU_REPORT()
-	;
+				;
 	free(ALLOCATOR);
 	return minunit_status;
 }
