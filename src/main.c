@@ -9,6 +9,7 @@
 #include "base/MapTests.h"
 #include "base/MemoryOpTests.h"
 #include "base/MPoolTests.h"
+#include "base/Identifier/IdentifierTests.h"
 #include "base/Graph/GraphTests.h"
 #include "base/Tree/TreeTests.h"
 #include "base/Vector/VectorTests.h"
@@ -25,6 +26,7 @@ int main(int argc, char **argv)
 			MemoryArrayOpTests,//
 			VectorTests,//
 			MapTests,//
+			IdentifierTests,
 			MPoolTests,//
 			GraphTests,//
 			TreeTests,//
