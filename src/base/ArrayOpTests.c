@@ -385,7 +385,7 @@ MU_TEST(testBSearch)
 	for (int N = 1; N <= ZRCARRAY_NBOBJ(array); N++)
 	{
 		val = testSearch(N,);
-		ZRTEST_ASSERT_PTR_NEQ(NULL, val);
+		ZRTEST_ASSERT_PTR_NE(NULL, val);
 		ZRTEST_ASSERT_INT_EQ(N, *val);
 	}
 	ZRTEST_ASSERT_PTR_EQ(NULL, testSearch(0,));
@@ -394,7 +394,7 @@ MU_TEST(testBSearch)
 
 #define test(N, PITEM, SIDE) do{ \
 	int *ret = testSearch(N, SIDE); \
-	ZRTEST_ASSERT_PTR_NEQ(NULL, ret); \
+	ZRTEST_ASSERT_PTR_NE(NULL, ret); \
 	ZRTEST_ASSERT_PTR_EQ(PITEM, ret); \
 }while(0)
 

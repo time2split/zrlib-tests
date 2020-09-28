@@ -60,10 +60,10 @@ do{ \
 }while(0)
 
 #define ZRTEST_ASSERT_CHAR_EQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,char,==,"%c")
-#define ZRTEST_ASSERT_CHAR_NEQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,char,!=,"%c")
+#define ZRTEST_ASSERT_CHAR_NE(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,char,!=,"%c")
 
 #define ZRTEST_ASSERT_PTR_EQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,void*,==,"%p")
-#define ZRTEST_ASSERT_PTR_NEQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,void*,!=,"%p")
+#define ZRTEST_ASSERT_PTR_NE(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,void*,!=,"%p")
 
 #define ZRTEST_END(msg_buffer, result, expected) \
 	ZRTEST_RESULT(FUN_PREFIX, msg_buffer, result, expected)
