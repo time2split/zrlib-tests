@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <minunit/minunit.h>
+#include <stdbool.h>
 
 #include <zrlib/base/Map/HashTable.h>
 #include <zrlib/base/Map/VectorMap.h>
@@ -90,6 +91,31 @@ MU_TEST(testGet)
 	ZRMap_destroy(map);
 }
 
+MU_TEST(testDeleteAll)
+{
+	ZRMAPTEST_BEGIN();
+	ZRMap *map = CONFIG->fmap_create(ZRTYPE_SIZE_ALIGNMENT(size_t), ZRTYPE_SIZE_ALIGNMENT(int));
+	size_t const nb = 100;
+	int val = 0;
+
+	for (size_t i = 0; i < nb; i++, val++)
+		ZRMap_put(map, &i, &val);
+
+	ZRTEST_ASSERT_INT_EQ(nb, ZRMAP_NBOBJ(map));
+
+	ZRTEST_CHECK(NULL != ZRMAP_GET(map, (size_t[]) {0}));
+	ZRTEST_CHECK(NULL != ZRMAP_GET(map, (size_t[]) {99}));
+
+	ZRMAP_DELETEALL(map);
+
+	ZRTEST_ASSERT_INT_EQ(0, ZRMAP_NBOBJ(map));
+	ZRTEST_CHECK(NULL == ZRMAP_GET(map, (size_t[]) {0}));
+	ZRTEST_CHECK(NULL == ZRMAP_GET(map, (size_t[]) {99}));
+
+	ZRMap_destroy(map);
+}
+
+
 MU_TEST(testStress)
 {
 	ZRMAPTEST_BEGIN();
@@ -120,6 +146,7 @@ MU_TEST(testStress)
 MU_TEST_SUITE( AllTests)
 {
 	MU_RUN_TEST(testGet);
+	MU_RUN_TEST(testDeleteAll);
 	MU_RUN_TEST(testStress);
 }
 
