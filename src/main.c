@@ -21,6 +21,7 @@ char FUN_PREFIX[1024];
 
 int main(int argc, char **argv)
 {
+	zrlib_initCurrentThread();
 	int (*testSuites[])(void) =
 	{	//
 			BitsTests,//
@@ -44,5 +45,6 @@ int main(int argc, char **argv)
 		if (status)
 			fprintf(stderr, "Error for test suite %d, status %d\n", i, status);
 	}
+	zrlib_endCurrentThread();
 	return 0;
 }
