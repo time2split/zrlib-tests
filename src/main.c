@@ -11,6 +11,7 @@
 #include "base/MemoryOpTests.h"
 #include "base/MPoolTests.h"
 #include "base/Identifier/IdentifierTests.h"
+#include "base/Identifier/IDGenerator/IDGeneratorTests.h"
 #include "base/Graph/GraphTests.h"
 #include "base/Tree/TreeTests.h"
 #include "base/Vector/VectorTests.h"
@@ -31,6 +32,7 @@ int main(int argc, char **argv)
 			MPoolTests,//
 			GraphTests,//
 			TreeTests,//
+			IDGeneratorTests,
 	};
 	int i = 0;
 	const int nbof = ZRCARRAY_NBOBJ(testSuites);
