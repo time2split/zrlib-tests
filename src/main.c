@@ -4,6 +4,7 @@
  */
 #include <minunit/minunit.h>
 
+#include <zrlib/base/macro.h>
 #include "base/ArrayOpTests.h"
 #include "base/BitsTests.h"
 #include "base/MapTests.h"
@@ -32,7 +33,7 @@ int main(int argc, char **argv)
 			TreeTests,//
 	};
 	int i = 0;
-	const int nbof = sizeof(testSuites) / sizeof(*testSuites);
+	const int nbof = ZRCARRAY_NBOBJ(testSuites);
 
 	for (; i < nbof; i++)
 	{
