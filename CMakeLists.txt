@@ -30,7 +30,7 @@ set(HEADERS
 	src/base/BitsTests.h
 	src/base/MapTests.h
 	src/base/Graph/GraphTests.h
-	src/base/Identifier/IdentifierTests.c
+	src/base/Identifier/IdentifierTests.h
 	src/base/Identifier/IDGenerator/IDGeneratorTests.h
 	src/base/Tree/TreeTests.h
 	src/base/MemoryOpTests.h

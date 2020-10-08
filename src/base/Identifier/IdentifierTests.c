@@ -38,7 +38,7 @@ ZRIdentifier* createMapIdentifier(void)
 	X(Map)
 
 #define X(a) #a, create ## a ## Identifier
-struct
+static struct
 {
 	char *name;
 	ZRIdentifier* (*fcreate)(void);
