@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <minunit/minunit.h>
+#include <zrlib/base/macro.h>
 
 // ============================================================================
 
@@ -30,6 +31,12 @@ do{ \
 	sprintf(FUN_PREFIX, "%s: " MSG, __FUNCTION__, __VA_ARGS__); \
 }while(0)
 
+#define ZRTEST_CATPRINTF(MSG, ...) ZRBLOCK( \
+	sprintf(FUN_PREFIX, "%s: " MSG, FUN_PREFIX, __VA_ARGS__); \
+)
+
+#define ZRTEST_FAIL() ZRBLOCK(mu_fail(FUN_PREFIX);)
+
 #define ZRTEST_CHECK(COND) \
 do{ \
 	if(!(COND)) { \
@@ -38,16 +45,30 @@ do{ \
 	} \
 }while(0)
 
-#define ZRTEST_ASSERT_TYPE_OP(E,R,TYPE,OP,PRINT) \
+#define ZRTEST_FAIL_MSG(MSG) ZRBLOCK( \
+	sprintf(FUN_PREFIX, "%s failed: %s!\n", FUN_PREFIX, MSG); \
+	mu_fail(FUN_PREFIX); \
+)
+
+
+
+#define ZRTEST_ASSERT_TYPE_OP(E,R,TYPE,OP,PRINT) ZRTEST_ASSERT_TYPE_COND(E,R,TYPE, ZRCODE(_r OP _e), OP, PRINT)
+
+#define ZRTEST_ASSERT_TYPE_COND(E,R,TYPE,COND,OP,PRINT) \
 do{ \
 	TYPE _e = (E); \
 	TYPE _r = (R); \
 	\
-	if(!(_r OP _e)) { \
-		sprintf(FUN_PREFIX, "%s" #E #OP #R "\n\tExpected " #OP PRINT " but have " PRINT "\n", FUN_PREFIX, _e, _r); \
+	if(!(COND)) { \
+		sprintf(FUN_PREFIX, "%s" #E " " #OP " " #R "\n\tExpected " #OP " " PRINT " but have " PRINT "\n", FUN_PREFIX, _e, _r); \
 		mu_fail(FUN_PREFIX); \
 	} \
 }while(0)
+
+#define ZRTEST_ASSERT_DOUBLE_EQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,double,==,"%lf")
+#define ZRTEST_ASSERT_DOUBLE_NE(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,double,!=,"%lf")
+#define ZRTEST_ASSERT_DOUBLE_GE(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,double,>=,"%lf")
+#define ZRTEST_ASSERT_DOUBLE_LE(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,double,<=,"%lf")
 
 #define ZRTEST_ASSERT_INT_EQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,int,==,"%d")
 #define ZRTEST_ASSERT_INT_NE(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,int,!=,"%d")
@@ -64,6 +85,9 @@ do{ \
 
 #define ZRTEST_ASSERT_PTR_EQ(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,void*,==,"%p")
 #define ZRTEST_ASSERT_PTR_NE(E,R) ZRTEST_ASSERT_TYPE_OP(E,R,void*,!=,"%p")
+
+#define ZRTEST_ASSERT_STR_EQ(E,R) ZRTEST_ASSERT_TYPE_COND(E,R,char*,ZRCODE(strcmp(R,E) == 0), strcmp, "%s")
+#define ZRTEST_ASSERT_STR_NE(E,R) ZRTEST_ASSERT_TYPE_COND(E,R,char*,ZRCODE(strcmp(R,E) != 0), strcmp, "%s")
 
 #define ZRTEST_END(msg_buffer, result, expected) \
 	ZRTEST_RESULT(FUN_PREFIX, msg_buffer, result, expected)
