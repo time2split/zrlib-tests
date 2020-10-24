@@ -11,6 +11,7 @@
 #include "base/MemoryOpTests.h"
 #include "base/MPoolTests.h"
 #include "base/Identifier/IdentifierTests.h"
+#include "base/Identifier/IdentifierUTests.h"
 #include "base/Identifier/IDGenerator/IDGeneratorTests.h"
 #include "base/Graph/GraphTests.h"
 #include "base/Tree/TreeTests.h"
@@ -30,6 +31,7 @@ int main(int argc, char **argv)
 			VectorTests,//
 			MapTests,//
 			IdentifierTests,
+			IdentifierUTests,
 			MPoolTests,//
 			GraphTests,//
 			TreeTests,//
