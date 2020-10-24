@@ -12,7 +12,9 @@ static ZRInitInfos_t INITINFOS;
 
 #define CONFIG_XLIST() \
 	X(fixedVector, true) \
-	X(dynamicVector, false)
+	X(dynamicVector, false) \
+	X(fixedOneSide, true) \
+	X(dynamicOneSide, false)
 
 #define ZRVECTORTEST_BEGIN() ZRTEST_PRINTF("(%s) ", CONFIG.name)
 
@@ -43,6 +45,27 @@ ZRVector* create_dynamicVector(ZRObjInfos objInfos, size_t initialArraySize, siz
 {
 	ZRVector2SideStrategyInfos(INITINFOS, objInfos);
 	ZRVector2SideStrategyInfos_allocator(INITINFOS, ALLOCATOR);
+	ZRVector2SideStrategyInfos_initialArraySize(INITINFOS, initialArraySize);
+	ZRVector2SideStrategyInfos_initialMemorySize(INITINFOS, initialMemorySize);
+	return ZRVector2SideStrategy_new(INITINFOS);
+}
+
+ZRVector* create_fixedOneSide(ZRObjInfos objInfos, size_t initialArraySize, size_t initialMemorySize)
+{
+	ZRVector2SideStrategyInfos(INITINFOS, objInfos);
+	ZRVector2SideStrategyInfos_allocator(INITINFOS, ALLOCATOR);
+	ZRVector2SideStrategyInfos_oneSide(INITINFOS);
+	ZRVector2SideStrategyInfos_fixedArray(INITINFOS);
+	ZRVector2SideStrategyInfos_initialArraySize(INITINFOS, initialArraySize);
+	ZRVector2SideStrategyInfos_initialMemorySize(INITINFOS, initialMemorySize);
+	return ZRVector2SideStrategy_new(INITINFOS);
+}
+
+ZRVector* create_dynamicOneSide(ZRObjInfos objInfos, size_t initialArraySize, size_t initialMemorySize)
+{
+	ZRVector2SideStrategyInfos(INITINFOS, objInfos);
+	ZRVector2SideStrategyInfos_allocator(INITINFOS, ALLOCATOR);
+	ZRVector2SideStrategyInfos_oneSide(INITINFOS);
 	ZRVector2SideStrategyInfos_initialArraySize(INITINFOS, initialArraySize);
 	ZRVector2SideStrategyInfos_initialMemorySize(INITINFOS, initialMemorySize);
 	return ZRVector2SideStrategy_new(INITINFOS);
@@ -86,14 +109,22 @@ static void printArray_long(char *out, long *array, size_t nbObj)
 
 static bool checkArray_long(long *lexpected, size_t nbObj, ZRVector *result)
 {
+	char buffer_e[4096] = "";
+	char buffer_r[4096] = "";
+
+	if (nbObj != ZRVECTOR_NBOBJ(result))
+	{
+		printArray_long(buffer_e, lexpected, nbObj);
+		printArray_long(buffer_r, ZRVECTOR_ARRAYP(result), ZRVECTOR_NBOBJ(result));
+		ZRTEST_CATPRINTF("failed: expected\n%s but have\n%s\n", buffer_e, buffer_r);
+	}
+
 	for (size_t i = 0; i < nbObj; i++)
 	{
 		long res = *(long*)ZRVECTOR_GET(result, i);
 
 		if (res != lexpected[i])
 		{
-			char buffer_e[4096] = "";
-			char buffer_r[4096] = "";
 			printArray_long(buffer_e, lexpected, nbObj);
 			printArray_long(buffer_r, ZRVECTOR_ARRAYP(result), nbObj);
 			ZRTEST_CATPRINTF("failed: expected\n%s but have\n%s\n", buffer_e, buffer_r);
@@ -331,21 +362,20 @@ MU_TEST(testTrim)
 
 MU_TEST(testChangeSize)
 {
+	ZRObjInfos t1_infos = ZROBJINFOS_DEF(2, 4);
 	typedef char T1[4];
 	typedef uint64_t T2;
 
-	size_t const T1_align = 2;
 	ZRVECTORTEST_BEGIN();
 	size_t const nb = 100;
 	size_t const capacity = (nb + 1) * sizeof(T2);
-	ZRVector *result = CONFIG.fcreate(ZROBJINFOS_DEF(T1_align, sizeof(T1)), capacity, capacity);
+	ZRVector *result = CONFIG.fcreate(t1_infos, capacity, capacity);
 
 	for (T1 i = { 0 }; i[0] < nb; i[0]++)
 		ZRVector_add(result, &i);
 
 	ZRTEST_ASSERT_INT_EQ(nb, ZRVECTOR_NBOBJ(result));
-	ZRTEST_CHECK(ZRAddress_aligned_a(ZRVECTOR_ARRAYP(result), T1_align));
-	return;
+	ZRTEST_CHECK(ZRAddress_aligned_a(ZRVECTOR_ARRAYP(result), t1_infos.alignment));
 	ZRVector_changeObjSize(result, ZRTYPE_OBJINFOS(T2));
 	ZRTEST_ASSERT_INT_EQ(0, ZRVECTOR_NBOBJ(result));
 
@@ -354,7 +384,7 @@ MU_TEST(testChangeSize)
 
 	ZRTEST_ASSERT_INT_EQ(nb, ZRVECTOR_NBOBJ(result));
 	ZRTEST_ASSERT_PTR_EQ(ZRVECTOR_GET(result, 0), ZRVECTOR_ARRAYP(result));
-	ZRTEST_ASSERT_INT_EQ(0, ZRAddress_aligned_a(ZRVECTOR_ARRAYP(result), alignof(T2)));
+	ZRTEST_CHECK(ZRAddress_aligned_a(ZRVECTOR_ARRAYP(result), alignof(T2)));
 	ZRTEST_ASSERT_INT_EQ(nb / 2, (*(T2* )ZRVECTOR_GET(result, nb / 2)));
 	ZRVector_destroy(result);
 }
