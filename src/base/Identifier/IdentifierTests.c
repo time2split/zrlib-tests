@@ -30,7 +30,8 @@ ZRIdentifier* createMapIdentifier(void)
 	char infos[1024 * 10];
 	zrfuhash fuhash = hash_long;
 
-	ZRMapIdentifierInfos(infos, OBJINFOS, &fuhash, 1, ALLOCATOR);
+	ZRMapIdentifierInfos(infos, OBJINFOS, &fuhash, 1);
+	ZRMapIdentifierInfos_allocator(infos, ALLOCATOR);
 	return ZRMapIdentifier_new(infos);
 }
 

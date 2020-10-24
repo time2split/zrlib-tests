@@ -38,12 +38,12 @@ int charcmp(void *a, void *b)
 
 static ZRMap* VectorMap_create(size_t keySize, size_t keyA, size_t objSize, size_t objA)
 {
-	return ZRVectorMap_create(keySize, keyA, objSize, objA, charcmp, NULL, ALLOCATOR, ZRVectorMap_modeOrder);
+	return ZRVectorMap_create(ZROBJINFOS_DEF(keyA, keySize), ZROBJINFOS_DEF(objA, objSize), charcmp, NULL, ALLOCATOR, ZRVectorMap_modeOrder);
 }
 
 static ZRMap* VectorMapEq_create(size_t keySize, size_t keyA, size_t objSize, size_t objA)
 {
-	return ZRVectorMap_create(keySize, keyA, objSize, objA, charcmp, NULL, ALLOCATOR, ZRVectorMap_modeEq);
+	return ZRVectorMap_create(ZROBJINFOS_DEF(keyA, keySize), ZROBJINFOS_DEF(objA, objSize), charcmp, NULL, ALLOCATOR, ZRVectorMap_modeEq);
 }
 
 // ============================================================================
