@@ -8,8 +8,6 @@
 #include <zrlib/base/Allocator/CAllocator.h>
 #include "../main.h"
 
-
-
 // ============================================================================
 
 ZRAllocator *ALLOCATOR;
@@ -31,7 +29,7 @@ static ZRMap* HashTable_create(size_t keySize, size_t keyA, size_t objSize, size
 	return ZRHashTable_create(ZROBJINFOS_DEF(keyA, keySize), ZROBJINFOS_DEF(objA, objSize), fhash_a, ZRCARRAY_NBOBJ(fhash_a), NULL, ALLOCATOR);
 }
 
-int charcmp(void *a, void *b)
+int charcmp(void *a, void *b, void *data)
 {
 	return *(size_t*)a - *(size_t*)b;
 }
@@ -63,7 +61,6 @@ static struct
 
 #define ZRMAPTEST_BEGIN() ZRTEST_PRINTF("config: %d, ", (int)(CONFIG - TEST_CONFIG))
 
-
 MU_TEST(testGet)
 {
 	ZRMAPTEST_BEGIN();
@@ -86,7 +83,7 @@ MU_TEST(testGet)
 	ZRTEST_ASSERT_INT_EQ(false, ZRMap_delete(map, &((size_t ) { 'Z' } )));
 
 	ZRTEST_ASSERT_INT_EQ(true, ZRMap_delete(map, &((size_t ) { 'd' } )));
-	ZRTEST_ASSERT_PTR_EQ(NULL, ZRMap_get(map, &((size_t ) { 'd'} )));
+	ZRTEST_ASSERT_PTR_EQ(NULL, ZRMap_get(map, &((size_t ) { 'd' } )));
 
 	ZRMap_destroy(map);
 }
@@ -103,18 +100,55 @@ MU_TEST(testDeleteAll)
 
 	ZRTEST_ASSERT_INT_EQ(nb, ZRMAP_NBOBJ(map));
 
-	ZRTEST_CHECK(NULL != ZRMAP_GET(map, (size_t[]) {0}));
-	ZRTEST_CHECK(NULL != ZRMAP_GET(map, (size_t[]) {99}));
+	ZRTEST_CHECK(NULL != ZRMAP_GET(map, (size_t[] ) { 0 }));
+	ZRTEST_CHECK(NULL != ZRMAP_GET(map, (size_t[] ) { 99 }));
 
 	ZRMAP_DELETEALL(map);
 
 	ZRTEST_ASSERT_INT_EQ(0, ZRMAP_NBOBJ(map));
-	ZRTEST_CHECK(NULL == ZRMAP_GET(map, (size_t[]) {0}));
-	ZRTEST_CHECK(NULL == ZRMAP_GET(map, (size_t[]) {99}));
+	ZRTEST_CHECK(NULL == ZRMAP_GET(map, (size_t[] ) { 0 }));
+	ZRTEST_CHECK(NULL == ZRMAP_GET(map, (size_t[] ) { 99 }));
 
 	ZRMap_destroy(map);
 }
 
+MU_TEST(cpyKeyValPtr)
+{
+	ZRMAPTEST_BEGIN();
+	ZRMap *map = CONFIG->fmap_create(ZRTYPE_SIZE_ALIGNMENT(size_t), ZRTYPE_SIZE_ALIGNMENT(int));
+	size_t const bufferSize = 13;
+	size_t const nb = 500;
+	size_t const nbCpyLoop = nb / bufferSize;
+	size_t const cpyLoopRest = nb % bufferSize;
+	ZRMapKeyVal buffer[bufferSize];
+	size_t nbLoop = 0;
+	size_t lastNbCpy;
+
+	for (size_t i = 0; i < nb; i++)
+		ZRMap_put(map, &i, (int[]) { i });
+
+	for (;;)
+	{
+		lastNbCpy = ZRMap_cpyKeyValPtr(map, buffer, nbLoop * bufferSize, bufferSize);
+
+		// All must be 0 because of NULL
+		for (size_t i = 0; i < lastNbCpy; i++)
+		{
+			ZRTEST_ASSERT_INT_RANGE(0, nb - 1, *(int* )buffer[i].val);
+		}
+
+		if (lastNbCpy < bufferSize)
+			break;
+
+		nbLoop++;
+	}
+	ZRTEST_ASSERT_INT_EQ(nbCpyLoop, nbLoop);
+
+	if (cpyLoopRest)
+		ZRTEST_ASSERT_INT_EQ(lastNbCpy, cpyLoopRest);
+
+	ZRMap_destroy(map);
+}
 
 MU_TEST(testStress)
 {
@@ -147,6 +181,7 @@ MU_TEST_SUITE( AllTests)
 {
 	MU_RUN_TEST(testGet);
 	MU_RUN_TEST(testDeleteAll);
+	MU_RUN_TEST(cpyKeyValPtr);
 	MU_RUN_TEST(testStress);
 }
 
