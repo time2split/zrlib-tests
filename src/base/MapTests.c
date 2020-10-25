@@ -4,6 +4,7 @@
 
 #include <zrlib/base/Map/HashTable.h>
 #include <zrlib/base/Map/VectorMap.h>
+#include <zrlib/base/Vector/Vector2SideStrategy.h>
 #include <zrlib/base/macro.h>
 #include <zrlib/base/Allocator/CAllocator.h>
 #include "../main.h"
@@ -26,7 +27,7 @@ static ZRMap* HashTable_create(size_t keySize, size_t keyA, size_t objSize, size
 	zrfuhash fhash_a[] =
 		{ fhash };
 
-	return ZRHashTable_create(ZROBJINFOS_DEF(keyA, keySize), ZROBJINFOS_DEF(objA, objSize), fhash_a, ZRCARRAY_NBOBJ(fhash_a), NULL, ALLOCATOR);
+	return ZRHashTable_create(ZROBJINFOS_DEF(keyA, keySize), ZROBJINFOS_DEF(objA, objSize), fhash_a, ZRCARRAY_NBOBJ(fhash_a), ALLOCATOR);
 }
 
 int charcmp(void *a, void *b, void *data)
@@ -44,12 +45,35 @@ static ZRMap* VectorMapEq_create(size_t keySize, size_t keyA, size_t objSize, si
 	return ZRVectorMap_create(ZROBJINFOS_DEF(keyA, keySize), ZROBJINFOS_DEF(objA, objSize), charcmp, NULL, ALLOCATOR, ZRVectorMap_modeEq);
 }
 
+static ZRMap* StaticVectorMap_create(size_t keySize, size_t keyA, size_t objSize, size_t objA)
+{
+	ZRInitInfos_t infos, vectorInfos;
+
+	ZRVectorMapInfos(&infos, ZROBJINFOS_DEF(keyA, keySize), ZROBJINFOS_DEF(objA, objSize));
+	ZRVectorMapInfos_allocator(&infos, ALLOCATOR);
+	ZRVectorMapInfos_fucmp(&infos, charcmp, ZRVectorMap_modeOrder);
+
+	ZRVector2SideStrategyInfos(&vectorInfos, ZROBJINFOS_DEF0());
+	ZRVector2SideStrategyInfos_initialArraySize(&vectorInfos, 10000);
+	ZRVector2SideStrategyInfos_allocator(&vectorInfos, ALLOCATOR);
+	ZRVector2SideStrategyInfos_oneSide(&vectorInfos);
+
+	ZRVectorMapInfos_staticVector(&infos, &vectorInfos,
+		ZRVector2SideStrategyInfos_setObjInfos,
+		ZRVector2SideStrategy_objInfos,
+		ZRVector2SideStrategy_init
+		);
+
+	return ZRVectorMap_new(&infos);
+}
+
 // ============================================================================
 
 #define XLIST \
 	X(HashTable) \
 	X(VectorMap) \
 	X(VectorMapEq)
+	X(StaticVectorMap) \
 
 #define X(item) #item, ZRCONCAT(item, _create),
 static struct
