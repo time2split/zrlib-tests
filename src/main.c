@@ -14,6 +14,7 @@
 #include "base/Identifier/IdentifierUTests.h"
 #include "base/Identifier/IDGenerator/IDGeneratorTests.h"
 #include "base/Graph/GraphTests.h"
+#include "base/structTests.h"
 #include "base/Tree/TreeTests.h"
 #include "base/Vector/VectorTests.h"
 
@@ -28,6 +29,7 @@ int main(int argc, char **argv)
 			BitsTests,//
 			MemoryOpTests,//
 			MemoryArrayOpTests,//
+			structTests,//
 			VectorTests,//
 			MapTests,//
 			IdentifierTests,
