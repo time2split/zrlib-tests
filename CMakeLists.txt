@@ -18,6 +18,7 @@ set(SRCS
 	src/base/Identifier/IdentifierUTests.c
 	src/base/Identifier/IDGenerator/IDGeneratorTests.c
 	src/base/structTests.c
+	src/base/Table/TableTests.c
 	src/base/Tree/TreeTests.c
 	src/base/Vector/VectorTests.c
 	src/benchmark/versus/Address_pow2VsArithmetic.c
@@ -36,6 +37,7 @@ set(HEADERS
 	src/base/Identifier/IdentifierUTests.h
 	src/base/Identifier/IDGenerator/IDGeneratorTests.h
 	src/base/structTests.h
+	src/base/Table/TableTests.h
 	src/base/Tree/TreeTests.h
 	src/base/MemoryOpTests.h
 	src/base/MPoolTests.h
