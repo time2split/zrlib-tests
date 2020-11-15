@@ -16,8 +16,8 @@ ZRIDGenerator* createIDGenerator(void)
 {
 	ZRInitInfos_t infos;
 
-	ZRIDGeneratorInfos(infos);
-	ZRIDGeneratorInfos_allocator(infos, ALLOCATOR);
+	ZRIDGeneratorIInfos(infos);
+	ZRIDGeneratorIInfos_allocator(infos, ALLOCATOR);
 	return ZRIDGenerator_new(infos);
 }
 

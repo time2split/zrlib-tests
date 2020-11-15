@@ -43,9 +43,9 @@ static ZRIdentifier* createMapIdentifier(void)
 	char infos[1024 * 10];
 	zrfuhash fuhash = hash_obj;
 
-	ZRMapIdentifierInfos(infos, ZROBJINFOS_DEF_UNKNOWN(), &fuhash, 1);
-	ZRMapIdentifierInfos_allocator(infos, ALLOCATOR);
-	ZRMapIdentifierInfos_fucmp(infos, cmp_obj);
+	ZRMapIdentifierIInfos(infos, ZROBJINFOS_DEF_UNKNOWN(), &fuhash, 1);
+	ZRMapIdentifierIInfos_allocator(infos, ALLOCATOR);
+	ZRMapIdentifierIInfos_fucmp(infos, cmp_obj);
 	return ZRMapIdentifier_new(infos);
 }
 

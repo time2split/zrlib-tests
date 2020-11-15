@@ -49,17 +49,17 @@ static ZRMap* StaticVectorMap_create(size_t keySize, size_t keyA, size_t objSize
 {
 	ZRInitInfos_t infos, vectorInfos;
 
-	ZRVectorMapInfos(&infos, ZROBJINFOS_DEF(keyA, keySize), ZROBJINFOS_DEF(objA, objSize));
-	ZRVectorMapInfos_allocator(&infos, ALLOCATOR);
-	ZRVectorMapInfos_fucmp(&infos, charcmp, ZRVectorMap_modeOrder);
+	ZRVectorMapIInfos(&infos, ZROBJINFOS_DEF(keyA, keySize), ZROBJINFOS_DEF(objA, objSize));
+	ZRVectorMapIInfos_allocator(&infos, ALLOCATOR);
+	ZRVectorMapIInfos_fucmp(&infos, charcmp, ZRVectorMap_modeOrder);
 
-	ZRVector2SideStrategyInfos(&vectorInfos, ZROBJINFOS_DEF0());
-	ZRVector2SideStrategyInfos_initialArraySize(&vectorInfos, 10000);
-	ZRVector2SideStrategyInfos_allocator(&vectorInfos, ALLOCATOR);
-	ZRVector2SideStrategyInfos_oneSide(&vectorInfos);
+	ZRVector2SideStrategyIInfos(&vectorInfos, ZROBJINFOS_DEF0());
+	ZRVector2SideStrategyIInfos_initialArraySize(&vectorInfos, 10000);
+	ZRVector2SideStrategyIInfos_allocator(&vectorInfos, ALLOCATOR);
+	ZRVector2SideStrategyIInfos_oneSide(&vectorInfos);
 
-	ZRVectorMapInfos_staticVector(&infos, &vectorInfos,
-		ZRVector2SideStrategyInfos_setObjInfos,
+	ZRVectorMapIInfos_staticVector(&infos, &vectorInfos,
+		ZRVector2SideStrategyIInfos_objInfos,
 		ZRVector2SideStrategy_objInfos,
 		ZRVector2SideStrategy_init
 		);

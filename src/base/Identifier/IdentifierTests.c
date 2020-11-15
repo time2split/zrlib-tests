@@ -12,26 +12,26 @@
 ZRAllocator *ALLOCATOR;
 ZRObjInfos OBJINFOS = ZRTYPE_OBJINFOS(TYPE);
 
-size_t hash_long(void *l, void *data)
+static size_t hash_long(void *l, void *data)
 {
 	return *(long*)l;
 }
 
-int hash_cmp(void *a, void *b, void *data)
+static int hash_cmp(void *a, void *b, void *data)
 {
 	return zrfcmp_long(*(long**)a, *(long**)b);
 }
 
 // ============================================================================
 
-ZRIdentifier* createMapIdentifier(void)
+static ZRIdentifier* createMapIdentifier(void)
 {
 	alignas (max_align_t)
 	char infos[1024 * 10];
 	zrfuhash fuhash = hash_long;
 
-	ZRMapIdentifierInfos(infos, OBJINFOS, &fuhash, 1);
-	ZRMapIdentifierInfos_allocator(infos, ALLOCATOR);
+	ZRMapIdentifierIInfos(infos, OBJINFOS, &fuhash, 1);
+	ZRMapIdentifierIInfos_allocator(infos, ALLOCATOR);
 	return ZRMapIdentifier_new(infos);
 }
 
